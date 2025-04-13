@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: alain
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: storage/development
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend_rails
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://alain:root@db:5432/development
+    volumes:
+      - ./backend_rails:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    command: >
+      sh -c "rails db:migrate && rails server -b 0.0.0.0"
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3001:3001"
+    depends_on:
+      - backend_rails
+
+volumes:
+  pgdata:

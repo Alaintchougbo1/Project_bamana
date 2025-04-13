@@ -59,14 +59,42 @@ COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
 # Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER 1000:1000
+# RUN groupadd --system --gid 1000 rails && \
+#     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+#     chown -R rails:rails db log storage tmp
+
+# USER 1000:1000
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
+#CMD ["./bin/thrust", "./bin/rails", "server"]
+
+
+
+
+
+RUN apt-get update -qq && apt-get install -y \
+  build-essential \
+  libpq-dev \
+  postgresql-client \
+  libvips \
+  && rm -rf /var/lib/apt/lists/*
+
+
+WORKDIR /app
+
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+
+COPY . .
+
+
+EXPOSE 3000
+
+
+CMD ["rails", "server", "-b", "0.0.0.0"]
