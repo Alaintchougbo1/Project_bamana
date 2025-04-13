@@ -1,15 +1,37 @@
-require 'rails_helper'
+require "rails_helper"
 
-# Specs in this file have access to a helper object that includes
-# the PostsHelper. For example:
-#
-# describe PostsHelper do
-#   describe "string concat" do
-#     it "concats two strings with spaces" do
-#       expect(helper.concat_strings("this","that")).to eq("this that")
-#     end
-#   end
-# end
-RSpec.describe PostsHelper, type: :helper do
-  pending "add some examples to (or delete) #{__FILE__}"
+RSpec.describe PostsController, type: :controller do
+  let(:user) { FactoryBot.create(:user) }
+  let(:token) { encode_token(user_id: user.id) }
+  let(:headers) { { "Authorization" => "Bearer #{token}" } }
+
+  before { request.headers.merge!(headers) }
+
+  describe "GET #index" do
+    it "returns posts for current user" do
+      FactoryBot.create(:post, user: user, title: "Test Post")
+      get :index
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body).first["title"]).to eq("Test Post")
+    end
+
+    it "filters posts by search" do
+      FactoryBot.create(:post, user: user, title: "Rails Post")
+      FactoryBot.create(:post, user: user, title: "Other")
+      get :index, params: { search: "Rails" }
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body).size).to eq(1)
+      expect(JSON.parse(response.body).first["title"]).to eq("Rails Post")
+    end
+  end
+
+  describe "POST #create" do
+    let(:valid_params) { { title: "New Post", content: "Content" } }
+
+    it "creates a new post" do
+      post :create, params: valid_params
+      expect(response).to have_http_status(:created)
+      expect(JSON.parse(response.body)["title"]).to eq("New Post")
+    end
+  end
 end
