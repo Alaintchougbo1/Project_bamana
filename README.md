@@ -11,7 +11,7 @@
 - **Tests** : Tests unitaires avec RSpec (backend) et Jest (frontend), couverture d’environ 50 %.
 
 ## Prérequis
-- **Ruby** : 3.2.2
+- **Ruby** : 3.3.2
 - **Node.js** : 18 ou supérieur
 - **PostgreSQL** : 15 ou supérieur
 - **npm** : Pour gérer les dépendances frontend
@@ -23,3 +23,19 @@
 ```bash
 git clone https://github.com/Alaintchougbo1/Project_bamana.git
 cd Project_bamana
+
+### 2. Installer les dépendances côté backend
+```bash
+Project_bamana>backend_rails> bundle install
+
+### 3. Démarrer le server backend
+```bash
+backend_rails> rails server
+
+### 4. Installer les dépendances côté front-end
+```bash
+Project_bamana>frontend> npm install
+
+### Démarrer le serveur frontend
+```bash
+frontend>npm run dev --port=3001
