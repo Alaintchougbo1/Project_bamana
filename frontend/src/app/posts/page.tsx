@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import { TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, PencilIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface Post {
   id: number;
@@ -15,6 +15,9 @@ interface Post {
 export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [order, setOrder] = useState("desc");
   const { user, token, loading, logout } = useAuth();
   const router = useRouter();
 
@@ -23,12 +26,14 @@ export default function PostsPage() {
     if (user && token) {
       fetchPosts();
     }
-  }, [user, loading, token, router]);
+  }, [user, loading, token, router, search, sortBy, order]);
 
   const fetchPosts = async () => {
     try {
+      const params = { search, sort_by: sortBy, order };
       const res = await axios.get("http://localhost:3000/posts", {
         headers: { Authorization: `Bearer ${token}` },
+        params,
       });
       setPosts(Array.isArray(res.data) ? res.data : []);
     } catch {
@@ -46,6 +51,11 @@ export default function PostsPage() {
     } catch {
       setError("Erreur suppression post");
     }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchPosts();
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
@@ -71,6 +81,44 @@ export default function PostsPage() {
             </button>
           </div>
         </div>
+        <form onSubmit={handleSearch} className="mb-8 bg-white p-4 rounded-xl shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+            <div className="flex items-center flex-1">
+              <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 mr-2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher par titre ou contenu"
+                className="w-full py-2 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              />
+            </div>
+            <div className="flex space-x-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="py-2 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              >
+                <option value="created_at">Date</option>
+                <option value="title">Titre</option>
+              </select>
+              <select
+                value={order}
+                onChange={(e) => setOrder(e.target.value)}
+                className="py-2 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+              >
+                <option value="desc">Décroissant</option>
+                <option value="asc">Croissant</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              Filtrer
+            </button>
+          </div>
+        </form>
         {error && (
           <p className="text-base text-red-500 text-center animate-pulse bg-red-50 py-2 rounded-lg mb-4">{error}</p>
         )}
