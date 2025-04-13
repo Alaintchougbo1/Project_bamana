@@ -24,18 +24,13 @@
 git clone https://github.com/Alaintchougbo1/Project_bamana.git
 cd Project_bamana
 
-### 2. Installer les dépendances côté backend
-```bash
+
+
 Project_bamana>backend_rails> bundle install
 
-### 3. Démarrer le server backend
-```bash
+
 backend_rails> rails server
 
-### 4. Installer les dépendances côté front-end
-```bash
 Project_bamana>frontend> npm install
 
-### Démarrer le serveur frontend
-```bash
 frontend>npm run dev --port=3001
